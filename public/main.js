@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
       moviesContainer.innerHTML = '';
       paginationControls.innerHTML = '';
 
-      let url = `/.netlify/functions/getMovies?page=${page}&limit=${moviesPerPage}`;
+      let url = `/movies?page=${page}&limit=${moviesPerPage}`;
       if (query) url += `&search=${encodeURIComponent(query)}`;
 
       const response = await fetch(url);
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (data.movies && data.movies.length) {
         renderMovies(data.movies);
-        renderPagination(data.total);
+        renderPagination(data.total || data.movies.length);
       } else {
         errorElement.textContent = 'Nenhum filme encontrado.';
       }
@@ -102,23 +102,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function fetchMovieDetails(id) {
     try {
-      const response = await fetch(`/.netlify/functions/getMovie?id=${id}`);
-      const data = await response.json();
+      const res = await fetch(`/movies/${id}`);
+      const data = await res.json();
       renderMovieDetails(data.movie);
       renderComments(data.comments);
       movieDetails.classList.remove('hidden');
       moviesContainer.classList.add('hidden');
       paginationControls.classList.add('hidden');
-    } catch (error) {
-      errorElement.textContent = `Erro: ${error.message}`;
+    } catch (err) {
+      errorElement.textContent = `Erro ao obter detalhes: ${err.message}`;
     }
   }
 
   function renderMovieDetails(movie) {
     detailContent.innerHTML = `
       <div class="details-header">
-      <h2>${movie.title}</h2>
-      <button id="edit-movie">Editar</button>
+        <h2>${movie.title}</h2>
+        <button id="edit-movie"> Editar</button>
       </div>
       <p><strong>Ano:</strong> ${String(movie.year).match(/\d{4}/)?.[0]}</p>
       <p><strong>Género:</strong> ${movie.genres?.join(', ') || 'N/A'}</p>
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const date = new Date(c.date).toLocaleDateString("pt-PT");
       return `
         <div class="comment">
-          <p><strong>${c.name}</strong> (${c.email}) <em>${date}</em></p>
+          <p><strong>${c.name}</strong> <em>${date}</em></p>
           <p>${c.text}</p>
           <button onclick="deleteComment('${c._id}')">Remover</button>
         </div>
@@ -190,37 +190,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const cast = document.getElementById("cast").value.trim();
     const poster = document.getElementById("poster").value.trim();
     const editingId = submitButton.dataset.editing;
-  
+
     if (!title || !year) return alert("Preenche pelo menos título e ano!");
-  
+
     const movie = { title, year, genres, cast, poster };
-  
+
     if (editingId) {
-      movie._id = editingId;
-  
-      const res = await fetch("/.netlify/functions/updateMovie", {
+      const res = await fetch(`/movies/${editingId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(movie),
       });
-  
       const result = await res.json();
-      if (result.modifiedCount > 0) {
-        alert("Filme atualizado com sucesso!");
-      } else {
-        alert("Nenhuma alteração feita ou erro ao atualizar.");
-      }
+      alert("Filme atualizado!");
     } else {
-      const res = await fetch("/.netlify/functions/addMovie", {
+      const res = await fetch("/movies", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(movie),
       });
-  
       const result = await res.json();
-      alert("Filme adicionado com ID: " + result.insertedId);
+      alert("Filme adicionado!");
     }
-  
+
     location.reload();
   });
 
@@ -243,8 +235,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!text || !email) return alert("Preenche todos os campos!");
 
-    const res = await fetch("/.netlify/functions/addComment", {
+    const res = await fetch("/comments", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, text, movie_id: movieId })
     });
 
@@ -280,13 +273,13 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchMovies();
 });
 
+
 async function deleteComment(id) {
   const confirmDelete = confirm("Remover este comentário?");
   if (!confirmDelete) return;
 
-  const res = await fetch("/.netlify/functions/deleteComment", {
-    method: "DELETE",
-    body: JSON.stringify({ id })
+  const res = await fetch(`/comments/${id}`, {
+    method: "DELETE"
   });
 
   const result = await res.json();
