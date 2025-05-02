@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinoFLix</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>LinoFLix</h1>
+    <div class="search-container">
+      <button id="home-button">Home</button>
+      <input type="text" id="search-input" placeholder="Procurar filmes..." />
+      <button id="search-button">Procurar</button>
+      <button id="add-movie-button">Adicionar Filme</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div id="loading">Carregar filmes...</div>
+      <div id="error" class="hidden"></div>
+
+      <div class="movies-grid" id="movies-container"></div>
+
+      <div id="movie-details" class="hidden">
+        <button id="back-button">Voltar</button>
+        <div id="detail-content"></div>
+
+        <div id="comments-section">
+          <h3>Comentários</h3>
+          <div id="comments-container"></div>
+
+          <div id="comment-form">
+            <input type="text" id="comment-name" placeholder="Teu nome" />
+            <input type="email" id="comment-email" placeholder="Teu email" />
+            <textarea id="comment-text" placeholder="Escreve um comentário..."></textarea>
+            <button id="submit-comment">Comentar</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="add-movie-form" class="hidden">
+        <h2>Adicionar Novo Filme</h2>
+        <input type="text" id="title" placeholder="Título" />
+        <input type="text" id="year" placeholder="Ano" />
+        <input type="text" id="genres" placeholder="Géneros (separados por vírgulas)" />
+        <input type="text" id="cast" placeholder="Elenco (separado por vírgulas)" />
+        <input type="text" id="poster" placeholder="URL do Poster (opcional)" />
+        <button id="submit-movie">Guardar</button>
+        <button id="cancel-add">Cancelar</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>
